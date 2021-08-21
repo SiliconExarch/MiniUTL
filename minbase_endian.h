@@ -139,7 +139,7 @@ inline T QWordSwapC( T dw )
 #endif
 
 #if __BYTE_ORDER == __BIG_ENDIAN
-	#if defined ( _PS3 )
+	#if defined ( _PS3 ) || defined ( __ppc64__ )
 		inline uint32 LoadLittleDWord( uint32 *base, unsigned int dwordIndex )
 		{
 			return __lwbrx( base + dwordIndex );
@@ -157,6 +157,37 @@ inline T QWordSwapC( T dw )
 		inline void StoreLittleInt64( uint64 *base, unsigned int nWordIndex, uint64 nWord )
 		{
 			__stdbrx( base + nWordIndex, nWord );
+		}
+	#elif defined ( __ppc__ )
+		inline uint32 LoadLittleDWord( uint32 *base, unsigned int dwordIndex )
+		{
+			uint32 v;
+			__asm__ ("lwbrx   %0, %y1" : "=r"(v) : "Z"(*(const uint32*)( base + dwordIndex )));
+			return v;
+		}
+
+		inline void StoreLittleDWord( uint32 *base, unsigned int dwordIndex, uint32 dword )
+		{
+			__asm__ ("stwbrx  %1, %y0" : "=Z"(*(uint32*)( base + dwordIndex )) : "r"(dword));
+		}
+		
+		inline uint64 LoadLittleInt64( uint64 *base, unsigned int nWordIndex )
+  		{
+ 			union { uint64 v; uint32 hl[2]; } v;
+			__asm__ ("lwbrx   %0, %y2  \n\t"
+					 "lwbrx   %1, %y3  \n\t"
+					 : "=&r"(v.hl[1]), "=r"(v.hl[0])
+					 : "Z"(*(const uint32*)( base + nWordIndex)), "Z"(*((const uint32*)( base + nWordIndex +1 ))));
+			return v.v;
+		}
+
+		inline void StoreLittleInt64( uint64 *base, unsigned int nWordIndex, uint64 nWord )
+		{
+			union { uint64 v; uint32 hl[2]; } vv = { nWord };
+			__asm__ ("stwbrx  %2, %y0  \n\t"
+					 "stwbrx  %3, %y1  \n\t"
+					 : "=Z"(*(uint32*)( base + nWordIndex )), "=Z"(*((uint32*)( base + nWordIndex + 1 )))
+					 : "r"(vv.hl[1]), "r"(vv.hl[0]));
 		}
 	#else
 		inline uint32 LoadLittleDWord( uint32 *base, unsigned int dwordIndex )
