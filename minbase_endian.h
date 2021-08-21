@@ -177,7 +177,7 @@ inline T QWordSwapC( T dw )
 			__asm__ ("lwbrx   %0, %y2  \n\t"
 					 "lwbrx   %1, %y3  \n\t"
 					 : "=&r"(v.hl[1]), "=r"(v.hl[0])
-					 : "Z"(*(const uint32*)( base + nWordIndex)), "Z"(*((const uint32*)( base + nWordIndex +1 ))));
+					 : "Z"(*(const uint32*)( base + nWordIndex )), "Z"(*((const uint32*)( base + nWordIndex + 1 ))));
 			return v.v;
 		}
 
