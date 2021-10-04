@@ -158,7 +158,7 @@ inline T QWordSwapC( T dw )
 		{
 			__stdbrx( base + nWordIndex, nWord );
 		}
-	#elif defined ( __ppc__ )
+	#elif defined ( __ppc__ ) || defined ( __PPC__ )
 		inline uint32 LoadLittleDWord( uint32 *base, unsigned int dwordIndex )
 		{
 			uint32 v;
